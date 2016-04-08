@@ -28,7 +28,7 @@ class GtukRepublishPosts {
         }
 
         add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-        add_action( 'republish_post', array( $this, 'republish_post' ) );
+        add_action( 'republish_post', array( $this, 'republish' ), 10, 2 );
     }
 
     /**
@@ -194,8 +194,8 @@ class GtukRepublishPosts {
      *
      * @param $post_id
      */
-    function republish_post( $post_id, $timestamp ) {
-        wp_update_post( array( 'ID' => $post_id, 'post_date' => $timestamp ) );
+    function republish( $post_id, $timestamp ) {
+        wp_update_post( array( 'ID' => $post_id, 'post_date' => date( 'Y-m-d H:i:s',  $timestamp ) ) );
         delete_post_meta( $post_id, '_republish_datetime' );
     }
 
@@ -207,7 +207,7 @@ class GtukRepublishPosts {
      */
     private function schedule_republish( $post_id, $timestamp ) {
         $this->unschedule_republish( $post_id );
-        wp_schedule_single_event( $timestamp, 'republish_post', array( $post_id ) );
+        wp_schedule_single_event( $timestamp, 'republish_post', array( $post_id, $timestamp ) );
     }
 
     /**
