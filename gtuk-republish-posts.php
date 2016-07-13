@@ -2,48 +2,131 @@
 /**
  * Plugin Name: Gtuk republish posts
  * Description: A plugin to add a republish date to pages, posts and custom post types.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Gtuk
  * Author URI: http://gtuk.me
  * License: GPLv2
+ * Text Domain: gtuk-republish-posts
+ * Domain Path: /languages
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     die();
 }
 
+add_action( 'plugins_loaded', array ( GtukRepublishPosts::get_instance(), 'plugin_setup' ) );
+
 class GtukRepublishPosts {
 
     /**
-     * GtukRepublishPosts constructor
+     * Plugin instance
      */
-    function __construct() {
-        if ( is_admin() ) {
-            add_action( 'post_submitbox_misc_actions', array( $this, 'post_submitbox_misc_actions' ) );
-            add_action( 'save_post', array( $this, 'modify_post_content' ) );
-            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+    protected static $instance = null;
 
-            add_action ( 'manage_posts_custom_column',	array( $this, 'print_republish_column' ), 10, 2 );
-            add_filter ( 'manage_edit-post_columns', array( $this, 'register_republish_column' ) );
-        }
+    /**
+     * URL to this plugin's directory
+     */
+    public $plugin_url = '';
 
-        add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-        add_action( 'republish_post', array( $this, 'republish_post' ) );
+    /**
+     * Path to this plugin's directory
+     */
+    public $plugin_path = '';
+
+    /**
+     * Name of the text domain
+     */
+    public $text_domain = 'gtuk-republish-posts';
+
+    /**
+     * Access the plugin’s working instance
+     *
+     * @return  object of this class
+     */
+    public static function get_instance() {
+        null === self::$instance and self::$instance = new self;
+        return self::$instance;
     }
 
     /**
-     * Load plugin internationalisation
+     * Plugin setup
+     *
+     * @return  void
      */
-    function load_textdomain() {
-        load_plugin_textdomain( 'gtuk-republish-posts', get_template_directory() . '/languages/' );
+    public function plugin_setup() {
+        $this->plugin_url    = plugins_url( '/', __FILE__ );
+        $this->plugin_path   = plugin_dir_path( __FILE__ );
+
+        $this->load_language( $this->text_domain );
+
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+        add_action( 'admin_init', array( $this, 'add_columns' ) );
+
+        if ( is_admin() ) {
+            add_action( 'post_submitbox_misc_actions', array( $this, 'edit_republish_box' ) );
+            add_action( 'save_post', array( $this, 'modify_post_content' ) );
+        }
+
+        add_action( 'republish_post',array( $this, 'republish' ), 10, 1 );
+    }
+
+    /**
+     * Constructor
+     */
+    public function __construct() {}
+
+    /**
+     * Load the translation file
+     *
+     * @param   string $domain
+     *
+     * @return  void
+     */
+    public function load_language( $domain ) {
+        load_plugin_textdomain(
+            $domain,
+            FALSE,
+            $this->plugin_path . '/languages'
+        );
     }
 
     /**
      * Enqueue admin scripts and styles
      */
-    function enqueue_scripts() {
+    public function enqueue_scripts() {
         wp_enqueue_script( 'gtuk-republish-posts', plugins_url( 'js/republish-posts.js', __FILE__ ), array( 'jquery' ), '', true );
         wp_enqueue_style( 'gtuk-republish-posts', plugins_url( 'css/republish-posts.css', __FILE__ ) );
+    }
+
+    /**
+     * Register column at the different post types
+     */
+    public function add_columns() {
+        $args = array(
+            'public'   => true,
+            '_builtin' => false,
+            'has_archive' => true,
+        );
+        $post_types = get_post_types( $args );
+
+        add_action( 'pre_get_posts', array( $this, 'republish_order_by' ), 1 );
+
+        add_action( 'manage_posts_custom_column', array( $this, 'print_republish_column' ), 10, 2 );
+        add_filter( 'manage_edit-post_columns', array( $this, 'register_republish_column' ) );
+        add_filter( 'manage_edit-post_sortable_columns', array( $this, 'sortable_republish_column' ) );
+
+        add_action( 'manage_pages_custom_column', array( $this, 'print_republish_column' ), 10, 2 );
+        add_filter( 'manage_edit-page_columns', array( $this, 'register_republish_column' ) );
+        add_filter( 'manage_edit-page_sortable_columns', array( $this, 'sortable_republish_column' ) );
+
+        /**
+         * Add custom column to custom post types
+         */
+        foreach ( $post_types as $post_type ) {
+            add_action( 'manage_'.$post_type.'s_custom_column', array( $this, 'print_republish_column' ), 10, 2 );
+            add_filter( 'manage_edit-'.$post_type.'_columns', array( $this, 'register_republish_column' ) );
+            add_filter( 'manage_edit-'.$post_type.'_sortable_columns', array( $this, 'sortable_republish_column' ) );
+        }
     }
 
     /**
@@ -52,33 +135,66 @@ class GtukRepublishPosts {
      * @param $column
      * @param $post_id
      */
-    function print_republish_column( $column, $post_id ) {
+    public function print_republish_column( $column, $post_id ) {
         switch ( $column ) {
             case 'republish':
-                $timestamp = get_post_meta($post_id, '_republish_datetime', true);
-
+                $timestamp = get_post_meta( $post_id, '_republish_datetime', true );
                 if ( $timestamp ) {
-                    echo date_i18n( get_option( 'date_format' ), strtotime( $timestamp ) );
+                    echo date_i18n( get_option( 'date_format' ), strtotime( $timestamp ) ).'<br>';
+                    printf( __( 'at %s O\'clock', $this->text_domain ), date_i18n( get_option( 'time_format' ), strtotime( $timestamp ) ) );
                 }
                 break;
         }
     }
-
     /**
      * Register custom column
      *
      * @param $columns
      * @return mixed
      */
-    function register_republish_column( $columns ) {
-        $columns['republish'] = __( 'Republish date', 'gtuk-republish-posts');
+    public function register_republish_column( $columns ) {
+        $column_republish = array( 'republish' => __( 'Republish date', $this->text_domain ) );
+        $columns = array_slice( $columns, 0, 9, true ) + $column_republish + array_slice( $columns, 1, null, true );
         return $columns;
+    }
+
+    /**
+     * Make custom column sortable
+     *
+     * @param $columns
+     *
+     * @return mixed
+     */
+    public function sortable_republish_column( $columns ) {
+        $columns['republish'] = 'republish';
+
+        return $columns;
+    }
+
+    /**
+     * Filter posts by column
+     *
+     * @param $query
+     */
+    public function republish_order_by( $query ) {
+        if ( ! is_admin() ) {
+            return;
+        }
+
+        if ( $query->is_main_query() && ( $orderby = $query->get( 'orderby' ) ) ) {
+            switch ( $orderby ) {
+                case 'republish':
+                    $query->set( 'meta_key', '_republish_datetime' );
+                    $query->set( 'orderby', 'meta_value' );
+                    break;
+            }
+        }
     }
 
     /**
      * Show republish box in post edit
      */
-    function post_submitbox_misc_actions() {
+    public function edit_republish_box() {
         global $post;
 
         if ( 'publish' != $post->post_status ) {
@@ -112,10 +228,9 @@ class GtukRepublishPosts {
         $year = date( 'Y', strtotime( $timestamp ) );
         $hour = date( 'H', strtotime( $timestamp ) );
         $minute = date( 'i', strtotime( $timestamp ) );
-
         ?>
         <div class="misc-pub-section curtime">
-            <span id="timestamp"><?php _e( 'Republish', 'gtuk-republish-posts' ); ?>:</span>
+            <span id="timestamp"><?php _e( 'Republish', $this->text_domain ); ?>:</span>
 			<span>
 				<b>
                     <?php
@@ -123,31 +238,31 @@ class GtukRepublishPosts {
                         $datef = __( 'M j, Y @ H:i' );
                         echo date_i18n( $datef, strtotime( $timestamp ) );
                     } else {
-                        _e( 'Never', 'gtuk-republish-posts' );
+                        _e( 'Never', $this->text_domain );
                     }
                     ?>
                 </b>
 			</span>
-            <a href="#edit_republish" class="edit-republish hide-if-no-js"><span aria-hidden="true"><?php _e( 'Edit', 'gtuk-republish-posts' ); ?></span> <span class="screen-reader-text"><?php _e( 'Edit republish date', 'gtuk-republish-posts' ); ?></span></a>
+            <a href="#edit_republish" class="edit-republish hide-if-no-js"><span aria-hidden="true"><?php _e( 'Edit', $this->text_domain ); ?></span> <span class="screen-reader-text"><?php _e( 'Edit republish date', $this->text_domain ); ?></span></a>
             <div id="gtuk-republish" class="hide-if-js">
                 <div>
-                    <label for="jj" class="screen-reader-text"><?php _e( 'Day', 'gtuk-republish-posts' ); ?></label>
+                    <label for="jj" class="screen-reader-text"><?php _e( 'Day', $this->text_domain ); ?></label>
                     <input type="text" id="jj" name="republish[day]" value="<?php echo $day; ?>" size="2" maxlength="2" autocomplete="off">
-                    <label for="mm" class="screen-reader-text"><?php _e( 'Month', 'gtuk-republish-posts' ); ?></label>
+                    <label for="mm" class="screen-reader-text"><?php _e( 'Month', $this->text_domain ); ?></label>
                     <select id="mm" name="republish[month]">
                         <?php foreach ( $monthList as $key => $currentMonth ) { ?>
                             <option <?php echo ( $key == $month ? 'selected' : '' ) ?> value="<?php echo $key; ?>"><?php echo $currentMonth; ?></option>
                         <?php } ?>
                     </select>
-                    <label for="aa" class="screen-reader-text"><?php _e( 'Year', 'gtuk-republish-posts' ); ?></label>
+                    <label for="aa" class="screen-reader-text"><?php _e( 'Year', $this->text_domain ); ?></label>
                     <input type="text" id="aa" name="republish[year]" value="<?php echo $year; ?>" size="4" maxlength="4" autocomplete="off">,
-                    <label for="hh" class="screen-reader-text"><?php _e( 'Hour', 'gtuk-republish-posts' ); ?></label>
+                    <label for="hh" class="screen-reader-text"><?php _e( 'Hour', $this->text_domain ); ?></label>
                     <input type="text" id="hh" name="republish[hour]" value="<?php echo $hour; ?>" size="2" maxlength="2" autocomplete="off"> :
-                    <label for="mn" class="screen-reader-text"><?php _e( 'Minute', 'gtuk-republish-posts' ); ?></label>
+                    <label for="mn" class="screen-reader-text"><?php _e( 'Minute', $this->text_domain ); ?></label>
                     <input type="text" id="mn" name="republish[minute]" value="<?php echo $minute; ?>" size="2" maxlength="2" autocomplete="off">
                 </div>
                 <div>
-                    <a class="gtuk-cancel-republish hide-if-no-js button-cancel" href="#edit_republish"><?php _e( 'Cancel', 'gtuk-republish-posts' ); ?></a>
+                    <a class="gtuk-cancel-republish hide-if-no-js button-cancel" href="#edit_republish"><?php _e( 'Cancel', $this->text_domain ); ?></a>
                 </div>
             </div>
         </div>
@@ -194,8 +309,15 @@ class GtukRepublishPosts {
      *
      * @param $post_id
      */
-    function republish_post( $post_id, $timestamp ) {
-        wp_update_post( array( 'ID' => $post_id, 'post_date' => $timestamp ) );
+    public function republish( $post_id ) {
+        $post = array(
+            'ID'            => $post_id,
+            'post_date' => current_time( 'mysql' ),
+            'post_date_gmt' => current_time( 'mysql', 1 ),
+        );
+
+        wp_update_post( $post );
+
         delete_post_meta( $post_id, '_republish_datetime' );
     }
 
@@ -216,10 +338,6 @@ class GtukRepublishPosts {
      * @param $post_id
      */
     private function unschedule_republish( $post_id ) {
-        if ( wp_next_scheduled( 'republish_post', array( $post_id ) ) !== false ) {
-            wp_clear_scheduled_hook( 'republish_post', array( $post_id ) );
-        }
+        wp_clear_scheduled_hook( 'republish_post', array( $post_id ) );
     }
 }
-
-new GtukRepublishPosts();
