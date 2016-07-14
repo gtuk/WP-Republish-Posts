@@ -33,5 +33,8 @@ The plugin works with your custom post types out of the box.
 
 == Changelog ==
 
+= 1.0.1 =
+* Update tested wordpress versions.
+
 = 1.0.0 =
 * Initial plugin release.
