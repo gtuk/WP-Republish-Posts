@@ -2,8 +2,8 @@
 Contributors: gtuk
 Tags: republish, posts, push, pull, update, date
 Requires at least: 3.8
-Tested up to: 4.4
-Stable tag: 1.0.0
+Tested up to: 4.5
+Stable tag: 1.0.1
 License: GPLv2
 
 Adds the possibility to set a republish date to pages, posts and custom post types.

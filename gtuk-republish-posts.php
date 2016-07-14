@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gtuk republish posts
  * Description: A plugin to add a republish date to pages, posts and custom post types.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Gtuk
  * Author URI: http://gtuk.me
  * License: GPLv2
