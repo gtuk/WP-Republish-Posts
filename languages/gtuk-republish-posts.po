@@ -1,0 +1,116 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Gtuk republish posts\n"
+"POT-Creation-Date: 2016-07-16 10:18+0100\n"
+"PO-Revision-Date: 2016-07-16 10:18+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: gtuk-republish-posts.php:140
+#, php-format
+msgid "at %s O'clock"
+msgstr ""
+
+#: gtuk-republish-posts.php:152 gtuk-republish-posts.php:229
+msgid "Republish"
+msgstr ""
+
+#: gtuk-republish-posts.php:208
+msgid "01-Jan"
+msgstr ""
+
+#: gtuk-republish-posts.php:209
+msgid "02-Feb"
+msgstr ""
+
+#: gtuk-republish-posts.php:210
+msgid "03-Mar"
+msgstr ""
+
+#: gtuk-republish-posts.php:211
+msgid "04-Apr"
+msgstr ""
+
+#: gtuk-republish-posts.php:212
+msgid "05-May"
+msgstr ""
+
+#: gtuk-republish-posts.php:213
+msgid "06-Jun"
+msgstr ""
+
+#: gtuk-republish-posts.php:214
+msgid "07-Jul"
+msgstr ""
+
+#: gtuk-republish-posts.php:215
+msgid "08-Aug"
+msgstr ""
+
+#: gtuk-republish-posts.php:216
+msgid "09-Sept"
+msgstr ""
+
+#: gtuk-republish-posts.php:217
+msgid "10-Oct"
+msgstr ""
+
+#: gtuk-republish-posts.php:218
+msgid "11-Nov"
+msgstr ""
+
+#: gtuk-republish-posts.php:219
+msgid "12-Dec"
+msgstr ""
+
+#: gtuk-republish-posts.php:234
+msgid "M j, Y @ H:i"
+msgstr ""
+
+#: gtuk-republish-posts.php:237
+msgid "Never"
+msgstr ""
+
+#: gtuk-republish-posts.php:242
+msgid "Edit"
+msgstr ""
+
+#: gtuk-republish-posts.php:242
+msgid "Edit republish date"
+msgstr ""
+
+#: gtuk-republish-posts.php:245
+msgid "Day"
+msgstr ""
+
+#: gtuk-republish-posts.php:247
+msgid "Month"
+msgstr ""
+
+#: gtuk-republish-posts.php:253
+msgid "Year"
+msgstr ""
+
+#: gtuk-republish-posts.php:255
+msgid "Hour"
+msgstr ""
+
+#: gtuk-republish-posts.php:257
+msgid "Minute"
+msgstr ""
+
+#: gtuk-republish-posts.php:261
+msgid "Cancel"
+msgstr ""
