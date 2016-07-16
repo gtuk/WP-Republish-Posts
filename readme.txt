@@ -3,7 +3,7 @@ Contributors: gtuk
 Tags: republish, posts, push, pull, update, date
 Requires at least: 3.8
 Tested up to: 4.5
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2
 
 Adds the possibility to set a republish date to pages, posts and custom post types.
@@ -32,6 +32,11 @@ The plugin works with your custom post types out of the box.
 
 
 == Changelog ==
+
+= 1.1.0 =
+* Add translation support.
+* Add german translation.
+
 
 = 1.0.1 =
 * Update tested wordpress versions.

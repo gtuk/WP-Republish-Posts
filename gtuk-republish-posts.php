@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gtuk republish posts
  * Description: A plugin to add a republish date to pages, posts and custom post types.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Gtuk
  * Author URI: http://gtuk.me
  * License: GPLv2
@@ -61,12 +61,8 @@ class GtukRepublishPosts {
 
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
         add_action( 'admin_init', array( $this, 'add_columns' ) );
-
-        if ( is_admin() ) {
-            add_action( 'post_submitbox_misc_actions', array( $this, 'edit_republish_box' ) );
-            add_action( 'save_post', array( $this, 'modify_post_content' ) );
-        }
-
+        add_action( 'post_submitbox_misc_actions', array( $this, 'edit_republish_box' ) );
+        add_action( 'save_post', array( $this, 'modify_post' ) );
         add_action( 'republish_post',array( $this, 'republish' ), 10, 1 );
     }
 
@@ -85,8 +81,8 @@ class GtukRepublishPosts {
     public function load_language( $domain ) {
         load_plugin_textdomain(
             $domain,
-            FALSE,
-            $this->plugin_path . '/languages'
+            false,
+            plugin_basename( $this->plugin_path ) . '/languages'
         );
     }
 
@@ -153,7 +149,7 @@ class GtukRepublishPosts {
      * @return mixed
      */
     public function register_republish_column( $columns ) {
-        $column_republish = array( 'republish' => __( 'Republish date', $this->text_domain ) );
+        $column_republish = array( 'republish' => __( 'Republish', $this->text_domain ) );
         $columns = array_slice( $columns, 0, 9, true ) + $column_republish + array_slice( $columns, 1, null, true );
         return $columns;
     }
@@ -209,18 +205,18 @@ class GtukRepublishPosts {
         }
 
         $monthList = array(
-            '01' => '01-Jan',
-            '02' => '02-Feb',
-            '03' => '03-Mrz',
-            '04' => '04-Apr',
-            '05' => '05-Mai',
-            '06' => '06-Jun',
-            '07' => '07-Jul',
-            '08' => '08-Aug',
-            '09' => '09-Sep',
-            '10' => '10-Okt',
-            '11' => '11-Nov',
-            '12' => '12-Dez',
+            '01' => __( '01-Jan', $this->text_domain ),
+            '02' => __( '02-Feb', $this->text_domain ),
+            '03' => __( '03-Mar', $this->text_domain ),
+            '04' => __( '04-Apr', $this->text_domain ),
+            '05' => __( '05-May', $this->text_domain ),
+            '06' => __( '06-Jun', $this->text_domain ),
+            '07' => __( '07-Jul', $this->text_domain ),
+            '08' => __( '08-Aug', $this->text_domain ),
+            '09' => __( '09-Sept', $this->text_domain ),
+            '10' => __( '10-Oct', $this->text_domain ),
+            '11' => __( '11-Nov', $this->text_domain ),
+            '12' => __( '12-Dec', $this->text_domain ),
         );
 
         $day = date( 'd', strtotime( $timestamp ) );
@@ -274,7 +270,7 @@ class GtukRepublishPosts {
      *
      * @param $post_id
      */
-    public function modify_post_content( $post_id ) {
+    public function modify_post( $post_id ) {
         if ( null === $post_id ) {
             return;
         }
