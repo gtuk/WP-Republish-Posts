@@ -2,7 +2,7 @@
 Contributors: gtuk
 Tags: republish, posts, push, pull, update, date
 Requires at least: 3.8
-Tested up to: 4.5
+Tested up to: 4.9.8
 Stable tag: 1.1.0
 License: GPLv2
 
